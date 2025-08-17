@@ -1,48 +1,47 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Business Card AR Demo</title>
-    <!-- Include A-Frame and MindAR scripts -->
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <style>
-      body { margin: 0; overflow: hidden; }
-    </style>
-  </head>
-  <body>
-    <!-- A-Frame AR scene using MindAR image tracking -->
-    <a-scene
-      mindar-image="imageTargetSrc: targets.mind; autoStart: true;"
-      vr-mode-ui="enabled: false"
-      device-orientation-permission-ui="enabled: false"
-      color-space="sRGB"
-      renderer="colorManagement: true; physicallyCorrectLights"
-      embedded
-      style="width: 100vw; height: 100vh;"
-    >
-      <!-- Preload assets: the 3D model (GLB) -->
-      <a-assets>
-        <a-asset-item id="businessCatModel" src="businesscat.glb"></a-asset-item>
-      </a-assets>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>businesscat ar</title>
+<script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#000}
+  #error{position:fixed;z-index:5;left:0;right:0;top:0;padding:12px 14px;font-size:14px;line-height:1.4;text-align:center;background:#111;color:#fff;display:none}
+</style>
+</head>
+<body>
+<div id="error"></div>
+<a-scene mindar-image="imageTargetSrc: targets.mind; autoStart: true; uiScanning: false; uiLoading: false" renderer="antialias: true; colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+  <a-assets>
+    <a-asset-item id="cat" src="businesscat.glb"></a-asset-item>
+  </a-assets>
 
-      <!-- AR camera setup (fixed position, no manual controls) -->
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <a-entity light="type: ambient; intensity: 1"></a-entity>
+  <a-entity light="type: directional; intensity: 0.9" position="0 1 0.5"></a-entity>
 
-      <!-- MindAR image target (index 0 from targets.mind) with the 3D model on it -->
-      <a-entity mindar-image-target="targetIndex: 0">
-        <a-gltf-model
-          src="#businessCatModel"
-          position="0 0 0"
-          rotation="0 0 0"
-          scale="1 1 1"
-        ></a-gltf-model>
-      </a-entity>
+  <a-entity mindar-image-target="targetIndex: 0">
+    <a-entity gltf-model="#cat" position="0 0 0.06" rotation="0 0 0" scale="0.12 0.12 0.12"></a-entity>
+  </a-entity>
 
-      <!-- Lighting to illuminate the model -->
-      <a-light type="ambient" intensity="0.5"></a-light>
-      <a-light type="directional" intensity="1" position="0 1 0"></a-light>
-    </a-scene>
-  </body>
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+</a-scene>
+
+<script>
+  const scene=document.querySelector("a-scene");
+  const box=document.getElementById("error");
+  scene.addEventListener("arError",e=>{
+    let msg="카메라를 시작할 수 없습니다. 브라우저 설정에서 카메라 권한을 허용한 뒤 새로고침하세요.";
+    const n=e&&e.detail&&e.detail.error&&e.detail.error.name;
+    if(n==="NotAllowedError") msg="카메라 권한이 거부되었습니다. 권한을 허용하고 새로고침하세요.";
+    else if(n==="NotFoundError"||n==="OverconstrainedError") msg="사용 가능한 카메라를 찾을 수 없습니다. 다른 기기나 브라우저로 시도하세요.";
+    else if(n==="NotReadableError") msg="카메라에 접근할 수 없습니다. 다른 앱이 카메라를 사용 중일 수 있습니다.";
+    else if(n==="SecurityError") msg="보안 설정으로 차단되었습니다. HTTPS 환경에서 열어주세요.";
+    box.textContent=msg; box.style.display="block";
+  });
+  scene.addEventListener("arReady",()=>{ box.style.display="none"; });
+</script>
+</body>
 </html>
