@@ -1,53 +1,55 @@
-<!doctype html>
-<html lang="ko">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>businesscat ar</title>
-<script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-<style>
-  html,body{margin:0;height:100%;overflow:hidden;background:#000}
-  #error{position:fixed;z-index:5;left:0;right:0;top:0;padding:12px 14px;font-size:14px;text-align:center;background:#111;color:#fff;display:none}
-</style>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <title>MindAR Business Card</title>
+  
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  
+  <script src="./libs/mindar-image-aframe.prod.js"></script>
+  
+  <style>
+    /* 에러 메시지 스타일 */
+    #error-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      display: none; /* 평소에는 숨김 */
+      text-align: center;
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
-<div id="error"></div>
+  <div id="error-message"></div>
 
-<a-scene id="scene"
-  mindar-image="imageTargetSrc: targets.mind; autoStart: true; uiScanning: false; uiLoading: false; libPath: https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/"
-  renderer="antialias: true; colorManagement: true; physicallyCorrectLights: true"
-  vr-mode-ui="enabled: false">
-  <a-assets>
-    <a-asset-item id="cat" src="businesscat.glb"></a-asset-item>
-  </a-assets>
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets.mind; workerSrc: ./libs/mindar-image-worker.prod.js; autoStart: true; uiError: #error-message;"
+    renderer="colorManagement: true, physicallyCorrectLights"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+  >
+    <a-assets>
+      <a-asset-item id="catModel" src="./businesscat.glb"></a-asset-item>
+    </a-assets>
 
-  <a-entity light="type: ambient; intensity: 1"></a-entity>
-  <a-entity light="type: directional; intensity: 0.9" position="0 1 0.5"></a-entity>
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <a-entity mindar-image-target="targetIndex: 0">
-    <a-entity gltf-model="#cat" position="0 0 0.06" rotation="0 0 0" scale="0.12 0.12 0.12"></a-entity>
-  </a-entity>
-
-  <a-camera look-controls="enabled: false"></a-camera>
-</a-scene>
-
-<script>
-  const box=document.getElementById("error");
-  const show=msg=>{ box.textContent=msg; box.style.display="block"; };
-
-  const scene=document.getElementById("scene");
-  scene.addEventListener("arError",e=>{
-    const n=e?.detail?.error?.name;
-    if(n==="NotAllowedError") show("카메라 권한이 거부되었습니다. 브라우저 설정에서 허용 후 새로고침하세요.");
-    else if(n==="NotFoundError"||n==="OverconstrainedError") show("사용 가능한 카메라를 찾을 수 없습니다.");
-    else if(n==="NotReadableError") show("카메라 접근 실패. 다른 앱이 카메라 사용 중일 수 있습니다.");
-    else if(n==="SecurityError") show("보안 정책으로 차단됨. HTTPS로 접속했는지 확인하세요.");
-    else show("초기화 오류가 발생했습니다.");
-  });
-
-  // 워커/wasm 로드나 네트워크 이슈 표시
-  window.addEventListener("unhandledrejection",()=>show("라이브러리 로드 중 오류가 발생했습니다."));
-</script>
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-gltf-model
+        rotation="0 0 0"
+        position="0 0 0.1"
+        scale="0.2 0.2 0.2"
+        src="#catModel"
+        animation-mixer
+      ></a-gltf-model>
+    </a-entity>
+  </a-scene>
 </body>
 </html>
