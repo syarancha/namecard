@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Business Card AR</title>
+  <style>
+    html, body { margin:0; height:100%; overflow:hidden; background:#000; }
+    #overlay { position:fixed; left:0; right:0; top:0; display:flex; gap:.5rem; align-items:center; padding:.6rem .8rem; color:#fff; font:14px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji; background:linear-gradient(#0008,#0000); pointer-events:none; }
+    #overlay b { font-weight:600 }
+    #warn { position:fixed; left:50%; transform:translateX(-50%); bottom:.75rem; color:#fff; background:#000a; padding:.5rem .7rem; border-radius:.5rem; font:12px/1.3 system-ui; }
+    .btn { position:fixed; right:.75rem; bottom:.75rem; padding:.5rem .75rem; border-radius:.5rem; font:12px/1.3 system-ui; color:#111; background:#fff; border:0; cursor:pointer; }
+    .btn:active { transform:translateY(1px) }
+  </style>
+  <!-- A-Frame & MindAR (Image Tracking) -->
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.6.0/dist/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+</head>
+<body>
+  <div id="overlay">🔎 <b>명함을 화면에 꽉 차게 보이도록 맞춰 보세요.</b> 인식되면 고양이 모델이 위에 나타납니다.</div>
+  <div id="warn" hidden>카메라 권한이 필요합니다. 브라우저 설정에서 허용하세요.</div>
+  <button class="btn" id="recenter">Recenter</button>
+
+  <!--
+    프로젝트 파일 구성 (리포지토리 루트):
+      - index.html  (본 파일)
+      - business cat.glb  (3D 캐릭터, GLB)
+      - targets.mind      (MindAR 이미지 타겟 파일)
+      - business card.jpg (원본 명함 이미지 — 참고용)
+
+    중요: 'business card.jpg'로부터 targets.mind 파일을 먼저 생성해야 합니다.
+    MindAR Image Target Compiler를 이용해 단일 타겟(.mind) 파일을 생성하고
+    파일명을 'targets.mind'로 저장하여 같은 폴더에 두세요.
+  -->
+
+  <a-scene
+    mindar-image="imageTargetSrc: ./targets.mind; filterMinCF: 0.0001; filterBeta: 0.001"
+    embedded
+    color-space="sRGB"
+    renderer="colorManagement: true, physicallyCorrectLights: true, antialias: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+  >
+    <a-assets>
+      <!-- 공백이 있는 파일명은 URL 인코딩 필요: space => %20 -->
+      <a-asset-item id="cat" src="./business%20cat.glb"></a-asset-item>
+    </a-assets>
+
+    <!-- 조명 -->
+    <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+    <a-entity light="type: directional; intensity: 1.1" position="1 2 1"></a-entity>
+
+    <!-- 이미지 타겟(0번)에 모델 배치 -->
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-gltf-model src="#cat" position="0 0 0" rotation="0 0 0" scale="0.25 0.25 0.25" animation-mixer></a-gltf-model>
+      <!-- 약간의 떠 있음/반짝임 효과 -->
+      <a-entity position="0 -0.01 0" geometry="primitive: circle; radius: 0.65" material="color: #111; opacity: 0.35; transparent: true"></a-entity>
+    </a-entity>
+
+    <!-- 카메라 -->
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  </a-scene>
+
+  <script>
+    // iOS 카메라 권한 안내 처리
+    const sceneEl = document.querySelector('a-scene');
+    const warn = document.getElementById('warn');
+    sceneEl.addEventListener('absolutecameraerror', () => warn.hidden = false);
+
+    // 화면 중앙 재정렬 (트래킹 흔들릴 때)
+    document.getElementById('recenter').addEventListener('click', () => {
+      const comp = sceneEl.systems['mindar-image'];
+      if (comp && comp.mindar && comp.mindar.controller) {
+        comp.mindar.controller.reset();
+      }
+    });
+
+    // 성능 최적화: 저전력기기에서 픽셀비 조정
+    if (window.devicePixelRatio > 1.5) {
+      const threeRenderer = sceneEl.renderer;
+      sceneEl.addEventListener('loaded', () => {
+        if (threeRenderer) threeRenderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+      });
+    }
+  </script>
+</body>
+</html>
