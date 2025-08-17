@@ -1,55 +1,76 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta charset="utf-8">
-  <title>MindAR Business Card</title>
-  
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  
-  <script src="./libs/mindar-image-aframe.prod.js"></script>
-  
-  <style>
-    /* 에러 메시지 스타일 */
-    #error-message {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 20px;
-      border-radius: 10px;
-      display: none; /* 평소에는 숨김 */
-      text-align: center;
-      z-index: 1000;
-    }
-  </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AR 명함 테스트</title>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    
+    <style>
+        /* 화면 전체를 사용하는 UI 스타일 */
+        body {
+            margin: 0;
+            overflow: hidden; /* 스크롤바 제거 */
+        }
+        #ar-scene {
+            width: 100%;
+            height: 100vh; /* 화면 높이에 꽉 차게 */
+        }
+        /* 에러 메시지 스타일 */
+        .error-message {
+            display: none; /* 기본적으로 숨김 */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: sans-serif;
+            text-align: center;
+            z-index: 1000;
+        }
+        /* 로딩 UI 스타일 */
+        .loading-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
+    </style>
 </head>
 <body>
-  <div id="error-message"></div>
+    <div class="loading-ui" id="loading-ui">
+        <p>AR 환경을 불러오는 중입니다...</p>
+    </div>
 
-  <a-scene
-    mindar-image="imageTargetSrc: ./targets.mind; workerSrc: ./libs/mindar-image-worker.prod.js; autoStart: true; uiError: #error-message;"
-    renderer="colorManagement: true, physicallyCorrectLights"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false"
-  >
-    <a-assets>
-      <a-asset-item id="catModel" src="./businesscat.glb"></a-asset-item>
-    </a-assets>
+    <div id="error-message-container" class="error-message"></div>
 
-    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-    <a-entity mindar-image-target="targetIndex: 0">
-      <a-gltf-model
-        rotation="0 0 0"
-        position="0 0 0.1"
-        scale="0.2 0.2 0.2"
-        src="#catModel"
-        animation-mixer
-      ></a-gltf-model>
-    </a-entity>
-  </a-scene>
+    <a-scene 
+        id="ar-scene"
+        mindar-image="imageTargetSrc: ./businesscard.jpg; autoStart: true; uiLoading: #loading-ui; uiError: #error-message-container;"
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
+        
+        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+        
+        <a-entity mindar-image-target="targetIndex: 0">
+            <a-gltf-model 
+                src="./businesscat.glb"
+                position="0 0.1 0"
+                scale="0.2 0.2 0.2"
+                rotation="0 0 0">
+            </a-gltf-model>
+        </a-entity>
+    </a-scene>
 </body>
 </html>
