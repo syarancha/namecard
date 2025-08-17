@@ -2,13 +2,20 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AR 명함 최종 테스트</title>
+    <title>AR 명함</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
-        body { margin: 0; overflow: hidden; }
-        #ar-scene { width: 100%; height: 100vh; }
+        /* 화면 전체를 사용하는 기본 스타일 */
+        body {
+            margin: 0;
+            overflow: hidden; /* 스크롤바 제거 */
+        }
+        #ar-scene {
+            width: 100%;
+            height: 100vh; /* 화면 높이에 꽉 차게 */
+        }
     </style>
 </head>
 <body>
@@ -23,12 +30,12 @@
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
         
         <a-entity mindar-image-target="targetIndex: 0">
-            <a-box 
-                position="0 0.25 0" 
-                scale="0.5 0.5 0.5" 
-                color="gray">
-            </a-box>
-
+            <a-gltf-model 
+                src="./businesscat.glb"
+                position="0 0.1 0"
+                scale="0.2 0.2 0.2"
+                rotation="0 0 0">
+            </a-gltf-model>
         </a-entity>
     </a-scene>
 </body>
